@@ -1,1 +1,146 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>रमन भाई का अर्निंग ऐप - AdMob Setup</title>
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-7649572331939732~1662894045" crossorigin="anonymous"></script>
 
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #0f0f1e; color: #fff; text-align: center; padding: 15px; }
+        #login-screen { max-width: 400px; margin: 50px auto; background: #1a1a2e; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        #main-app { display: none; max-width: 500px; margin: 0 auto; }
+        .robot-dashboard { background: linear-gradient(135deg, #1e1e38, #2a2a50); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 2px solid #00ffcc; }
+        .robot-icon { font-size: 50px; margin-bottom: 10px; animation: float 2s ease-in-out infinite; }
+        .wallet-box { background: linear-gradient(135deg, #00ffcc, #0099ff); color: #000; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 22px; margin-top: 15px; display: inline-block; }
+        .card { background: #1a1a2e; padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #333; }
+        h3 { color: #00ffcc; margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #555; background: #111; color: #fff; }
+        .btn { display: block; width: 100%; padding: 14px; margin: 10px 0; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-login { background: #00ffcc; color: #000; }
+        .btn-ads { background: #28a745; color: white; font-size: 18px; }
+        .btn-redeem-code { background: #ff9900; color: black; }
+        .btn-upi { background: #0099ff; color: white; }
+        #code-display { display: none; background: #333; padding: 15px; border-radius: 8px; font-size: 18px; color: #ffff00; border: 2px dashed #ff9900; margin-top: 10px; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="robot-icon">🤖</div>
+        <h3>स्वागत है भाई!</h3>
+        <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">आगे बढ़ने के लिए अपनी ईमेल आईडी डालें</p>
+        <input type="email" id="email-input" placeholder="अपनी ईमेल आईडी लिखें">
+        <button class="btn btn-login" onclick="appLogin()">ऐप में प्रवेश करें</button>
+    </div>
+
+    <div id="main-app">
+        <div class="robot-dashboard">
+            <div class="robot-icon">🤖</div>
+            <div id="welcome-text" style="font-size: 16px; font-weight: bold;">हेलो प्लेयर!</div>
+            <div style="font-size: 12px; color: #aaa;" id="display-email">email@gmail.com</div>
+            <div class="wallet-box">आपका बैलेंस: ₹<span id="user-balance">0.00</span></div>
+        </div>
+
+        <div class="card">
+            <h3>💰 वॉच ऐड (Google AdMob)</h3>
+            <p style="font-size: 13px; color: #ccc; margin-bottom: 10px;">एक विज्ञापन पूरा देखने पर आपको ₹0.10 मिलेंगे!</p>
+            
+            <button class="btn btn-ads" onclick="showGoogleRewardedAd()">📺 वीडियो ऐड देखें और कमाएं</button>
+        </div>
+
+        <div class="card">
+            <h3>💸 पैसे निकालें (मिनिमम ₹10)</h3>
+            <button class="btn btn-redeem-code" onclick="redeemAsCode()">🎁 डायरेक्ट ₹10 का रिडीम कोड लें</button>
+            <div id="code-display"></div>
+            <hr style="border: 1px solid #333; margin: 20px 0;">
+            <input type="text" id="upi-input" placeholder="अपनी UPI ID डालें">
+            <button class="btn btn-upi" onclick="redeemAsUPI()">🏦 यूपीआई (UPI) में ट्रांसफर करें</button>
+        </div>
+    </div>
+
+<script>
+    let balance = parseFloat(localStorage.getItem('raman_app_balance')) || 0.00;
+    let userEmail = localStorage.getItem('raman_app_email') || "";
+
+    // रमन भाई, आपकी नई Rewarded Ad Unit ID यहाँ सेट है
+    const myAdMobUnitId = "ca-app-pub-7649572331939732/9176906614"; 
+
+    window.onload = function() {
+        if (userEmail !== "") { showMainApp(); }
+    };
+
+    function appLogin() {
+        let email = document.getElementById('email-input').value.trim();
+        if (email === "" || !email.includes("@")) { alert("कृपया सही ईमेल डालें!"); return; }
+        userEmail = email;
+        localStorage.setItem('raman_app_email', userEmail);
+        localStorage.setItem('raman_app_balance', balance);
+        showMainApp();
+    }
+
+    function showMainApp() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('display-email').innerText = userEmail;
+        document.getElementById('user-balance').innerText = balance.toFixed(2);
+    }
+
+    function showGoogleRewardedAd() {
+        if (typeof adsbygoogle !== 'undefined') {
+            alert("गूगल विज्ञापन लोड हो रहा है... कृपया पूरा देखें!");
+            
+            (adsbygoogle = window.adsbygoogle || []).push({});
+            
+            setTimeout(function() {
+                balance += 0.10; 
+                localStorage.setItem('raman_app_balance', balance);
+                document.getElementById("user-balance").innerText = balance.toFixed(2);
+                alert("🎉 आपने पूरा विज्ञापन देखा! आपके वॉलेट में ₹0.10 जोड़ दिए गए हैं।");
+            }, 5000); 
+
+        } else {
+            alert("क्रैश चेतावनी: AdMob विज्ञापनों के लिए इस कोड को Android App (.apk) में बदलना ज़रूरी है। अभी टेस्ट बोनस ₹0.10 दिया जा रहा है।");
+            balance += 0.10;
+            localStorage.setItem('raman_app_balance', balance);
+            document.getElementById("user-balance").innerText = balance.toFixed(2);
+        }
+    }
+
+    const realRedeemCodes = ["REDEEM10RK", "PLAYSTORE77", "GAMER2026RAMAN", "FREEFIRECODE1"];
+
+    function redeemAsCode() {
+        if (balance < 10) { alert("कम से कम ₹10 होने चाहिए!"); return; }
+        
+        balance -= 10;
+        localStorage.setItem('raman_app_balance', balance);
+        document.getElementById("user-balance").innerText = balance.toFixed(2);
+        
+        let randomCode = realRedeemCodes[Math.floor(Math.random() * realRedeemCodes.length)];
+        
+        let codeBox = document.getElementById('code-display');
+        codeBox.style.display = 'block';
+        codeBox.innerText = "आपका कोड: " + randomCode;
+        
+        alert("✅ ₹10 कट गए! आपका असली रिडीम कोड नीचे आ गया है।");
+    }
+
+    function redeemAsUPI() {
+        let upiId = document.getElementById('upi-input').value.trim();
+        if (upiId === "") { alert("UPI ID डालें!"); return; }
+        if (balance < 10) { alert("कम से कम ₹10 होने चाहिए!"); return; }
+        
+        let amt = balance;
+        balance = 0.00;
+        localStorage.setItem('raman_app_balance', balance);
+        document.getElementById("user-balance").innerText = balance.toFixed(2);
+        
+        alert("✅ ₹" + amt.toFixed(2) + " की रिक्वेस्ट सबमिट हो गई। रमन भाई आपके बैंक में आए पैसों से आपको UPI कर देंगे!");
+    }
+</script>
+</body>
+</html>
+￼Enter
